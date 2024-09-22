@@ -1,117 +1,110 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+/* eslint-disable react-native/no-inline-styles */
+// App.js
+import React, {useState} from 'react';
+import {View, Text, TextInput, Button, Alert} from 'react-native';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
-import React from 'react';
-import type {Node} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App = () => {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSignUp, setIsSignUp] = useState(true); // Toggle between Sign Up and Login
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  // Sign Up Function
+  const handleSignUp = async () => {
+    if (email && password && username) {
+      try {
+        const userCredential = await auth().createUserWithEmailAndPassword(
+          email,
+          password,
+        );
+        const user = userCredential.user;
 
-/* $FlowFixMe[missing-local-annot] The type annotation(s) required by Flow's
- * LTI update could not be added via codemod */
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+        // Store the username in Firestore
+        await firestore().collection('Users').doc(user.uid).set({
+          username: username,
+          email: user.email,
+        });
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+        Alert.alert('Success!', 'User registered successfully');
+        // Clear input fields
+        setEmail('');
+        setPassword('');
+        setUsername('');
+      } catch (error) {
+        Alert.alert('Error', error.message);
+      }
+    } else {
+      Alert.alert('Error', 'Please fill all fields');
+    }
+  };
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  // Log In Function
+  const handleLogin = async () => {
+    if (email && password) {
+      try {
+        const userCredential = await auth().signInWithEmailAndPassword(
+          email,
+          password,
+        );
+        Alert.alert('Success!', `Welcome back, ${userCredential.user.email}`);
+      } catch (error) {
+        Alert.alert('Error', error.message);
+      }
+    } else {
+      Alert.alert('Error', 'Please fill in both email and password');
+    }
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <View style={{padding: 20}}>
+      <Text style={{fontSize: 24, fontWeight: 'bold', marginBottom: 20}}>
+        {isSignUp ? 'Sign Up' : 'Login'}
+      </Text>
+
+      {isSignUp && (
+        <>
+          <TextInput
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            style={{marginBottom: 10, borderWidth: 1, padding: 10}}
+          />
+        </>
+      )}
+
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        style={{marginBottom: 10, borderWidth: 1, padding: 10}}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+
+      <TextInput
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={{marginBottom: 10, borderWidth: 1, padding: 10}}
+      />
+
+      <Button
+        title={isSignUp ? 'Sign Up' : 'Login'}
+        onPress={isSignUp ? handleSignUp : handleLogin}
+      />
+
+      <Button
+        title={
+          isSignUp ? 'Already have an account? Login' : 'New user? Sign Up'
+        }
+        onPress={() => setIsSignUp(!isSignUp)}
+        color="gray"
+        style={{marginTop: 10}}
+      />
+    </View>
   );
 };
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1061138775748",
+    "firebase_url": "https://sigin-d13d1-default-rtdb.firebaseio.com",
+    "project_id": "sigin-d13d1",
+    "storage_bucket": "sigin-d13d1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1061138775748:android:79a36c6eaa5c393d9d5391",
+        "android_client_info": {
+          "package_name": "com.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5zXylF-roHIYDFzrxAKLHCnVqoZDS_Mk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
